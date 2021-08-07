@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+  <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  <style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  #mydiv {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+  }
+  .grid {
+    grid-template-columns: auto auto auto;
+    grid-template-rows: auto auto auto;
+    display: grid;
+    column-gap: 10px;
+    row-gap: 10px;
+    background: lightgray;
+  }
+  .square {
+    width: 110px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+  svg {
+    stroke-width: 15px;
+    stroke:lightblue;
+    fill: none;
+    stroke-linecap: round;
+    stroke-dasharray:300px;
+    stroke-dashoffset:300px;
+    animation-name: draw;
+    animation-duration:1s;
+    animation-fill-mode: forwards; // Stay on the last frame
+    /*animation-iteration-count: 1; // Run only once*/
+    /*animation-timing-function: linear;*/
+  }
+  .circle {
+    stroke: orange;
+  }
+  .Result {
+    width: 100%;
+    height: 100%;
+    position:absolute;
+    top: 0px;
+    left:0px;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 24px;
+    color: white;
+  }
+  .button {
+    border: none;
+    outline: none;
+    background: lightgreen;
+    width:100px;
+    height:25px;
+    text-decoration: uppercase;
+    border-radius:10px;
+  }
+  .button:hover {
+    background: black;
+    color: lightgreen;
+  }
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+  </style>
+  <body>
+  
+    <div id="mydiv"></div>
+
+    <script type="text/babel">
+    const empty="empty";
+    const circle="circle";
+    const cross="cross";
+    var i=0;
+    function detectWinner(p) {
+  if (p[0] == circle && p[1] == circle && p[2] == circle) return circle;
+  if (p[3] == circle && p[4] == circle && p[5] == circle) return circle;
+  if (p[6] == circle && p[7] == circle && p[8] == circle) return circle;
+
+  if (p[0] == circle && p[3] == circle && p[6] == circle) return circle;
+  if (p[1] == circle && p[4] == circle && p[7] == circle) return circle;
+  if (p[2] == circle && p[5] == circle && p[8] == circle) return circle;
+
+  if (p[0] == circle && p[4] == circle && p[8] == circle) return circle;
+  if (p[2] == circle && p[4] == circle && p[6] == circle) return circle;
+
+  if (p[0] == cross && p[1] == cross && p[2] == cross) return cross;
+  if (p[3] == cross && p[4] == cross && p[5] == cross) return cross;
+  if (p[6] == cross && p[7] == cross && p[8] == cross) return cross;
+
+  if (p[0] == cross && p[3] == cross && p[6] == cross) return cross;
+  if (p[1] == cross && p[4] == cross && p[7] == cross) return cross;
+  if (p[2] == cross && p[5] == cross && p[8] == cross) return cross;
+
+  if (p[0] == cross && p[4] == cross && p[8] == cross) return cross;
+  if (p[2] == cross && p[4] == cross && p[6] == cross) return cross;
+
+  //if (p.every((position) => position != //empty)) return "It is a tie";
+  if(i==9) return "no one win";
+}
+    function TicTacToe() {
+      const [state , setState] =React.useState({
+      player:circle,
+      positions:[
+        empty,empty,empty,
+        empty,empty,empty,
+        empty,empty,empty
+        ]
+      })
+      function takeTurn(position) {
+        const positions=[...state.positions];
+        positions[position]=state.player;
+        setState({
+          player:state.player==circle ? cross : circle ,
+          positions,
+        });
+        i++;
+      }
+      function reset() {
+        setState({
+          player:circle,
+          positions:[
+            empty,empty,empty,
+            empty,empty,empty,
+            empty,empty,empty
+            ]
+        });
+        i=0;
+      }
+      const winner=detectWinner(state.positions);
+      return (
+      <div className="grid">
+       <Square position={0} value={state.positions[0]} takeTurn={takeTurn}/>
+       <Square position={1} value={state.positions[1]} takeTurn={takeTurn}/>
+       <Square position={2} value={state.positions[2]} takeTurn={takeTurn}/>
+       <Square position={3} value={state.positions[3]} takeTurn={takeTurn}/>
+       <Square position={4} value={state.positions[4]} takeTurn={takeTurn}/>
+       <Square position={5} value={state.positions[5]} takeTurn={takeTurn}/>
+       <Square position={6} value={state.positions[6]} takeTurn={takeTurn}/>
+       <Square position={7} value={state.positions[7]}takeTurn={takeTurn}/>
+       <Square position={8} value={state.positions[8]} takeTurn={takeTurn}/>
+       {winner && <Result winner={winner} reset={reset} />}
+      </div>
+      );
+    }
+    function Square({position , value , takeTurn}) {
+      function handleClick() {
+        if(value==empty){
+        takeTurn(position);
+        }
+      }
+      return (<div className="square" onClick={handleClick}>
+      {value == circle && <Circle />}
+      {value == cross && <Cross />}
+      </div>
+      );
+    }
+    function Circle() {
+      return (
+        <svg width="100" height="100" viewBox="-50 -50 100 100" className="circle">
+      <circle cx="0" cy="0" r="40" />
+    </svg>
+      );
+    }
+    function Cross() {
+      return (
+        <svg width="100" height="100" viewBox="-50 -50 100 100">
+        <line x1="-40" y1="40" x2="40" y2="-40" />
+        <line x1="40" y1="40" x2="-40" y2="-40" />
+        </svg>
+        );
+    }
+    function Result({winner , reset}) {
+      return(
+        <div className="Result">
+        {winner==circle && "Circle won the game"}
+        {winner==cross && "Cross won the game"}
+        {winner=="no one win" && "No one win"}
+        <button className="button" onClick={reset}>reset</button>
+        </div>
+    );
+    }
+      ReactDOM.render(<TicTacToe />, document.getElementById('mydiv'))
+    </script>
+  </body>
+</html>
